@@ -4,6 +4,7 @@
   "description": "Hackathon @ 84.51",
   "main": "index.js",
   "dependencies": {
+    "json2csv": "^3.6.3",
     "ramda": "^0.22.1",
     "spotify-web-api-node": "^2.3.5"
   },
