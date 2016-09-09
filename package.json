@@ -1,0 +1,27 @@
+{
+  "name": "youseedata",
+  "version": "1.0.0",
+  "description": "Hackathon @ 84.51",
+  "main": "index.js",
+  "dependencies": {
+    "ramda": "^0.22.1",
+    "spotify-web-api-node": "^2.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sahilthapar/youseedata.git"
+  },
+  "keywords": [
+    "hackathon"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sahilthapar/youseedata/issues"
+  },
+  "homepage": "https://github.com/sahilthapar/youseedata#readme"
+}
