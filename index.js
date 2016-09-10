@@ -2,57 +2,87 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const R = require('ramda');
 const P = require('bluebird');
 const request = require('superagent');
-
-const songs = require('./platinum-songs');
-
-// Get credentials from command line
-const clientId = process.env['CLIENT_ID'];
-const clientSecret = process.env['CLIENT_SECRET'];
-// Uncomment and enter your access token
-// const accessToken =
+const csv2json = require('./csv2json');
+const json2csv = require('./json2csv');
 
 
-const spotifyApi = new SpotifyWebApi({
-  clientId : clientId,
-  clientSecret : clientSecret
-});
+const collatedDataFilePath = "./collated_data_set.csv";
 
+// Put your credentials in the credtials.js file;
+// DO NOT PUSH IT TO IT
+const accessToken = require('./credentials').access_token;
+console.log(accessToken);
+const spotifyApi = new SpotifyWebApi();
 spotifyApi.setAccessToken(accessToken);
 
-const songSearchQueries = R.map(function (song) {
-    return "track:" + song.Title + " artist:" + song.Artist;
-  })(songs);
-// console.log(songSearchQueries);
 
-const getCleanSong = function(song){
-  const nestedProps = {
-    album_type: song.album.album_type,
-    album_id: song.album.id,
-    album_name: song.album.name,
-    artist_ids: R.compose(R.join(';'), R.pluck('id'))(song.artists),
-    artist_names: R.compose(R.join(';'), R.pluck('name'))(song.artists)
-  };
-  const flatProps = R.pick(['id', 'name', 'popularity', 'explicit'])(song)
 
-  return R.merge(nestedProps)(flatProps);
-}
-const cleanUpSong = function(songBody){
-  // console.log(songBody.body.tracks.items);
-  const songs = R.map(getCleanSong)(songBody.body.tracks.items);
-  return songs;
+
+const getTrackQuery = function(song){
+  return "track:" + song.Song + " artist:" + song.Artist;
 };
 
-// const songRecords = P.mapSeries(songSearchQueries, function (songQuery){
-//   console.log(songQuery);
-//   return spotifyApi.searchTracks(songQuery);
-// }).then(function(songs){
-//   const allSongs = R.flatten(R.map(cleanUpSong)(songs));
-// });
+const extractProps = function(flag){
+  return function(song){
+    const nestedProps = {
+      album_type: song.album.album_type,
+      album_id: song.album.id,
+      album_name: song.album.name,
+      artist_ids: R.compose(R.join(';'), R.pluck('id'))(song.artists),
+      artist_names: R.compose(R.join(';'), R.pluck('name'))(song.artists),
+      flag: flag
+    };
+    const flatProps = R.pick(['id', 'name', 'popularity', 'explicit'])(song)
 
-const songs_attr = require('./song_attr');
+    return R.merge(nestedProps)(flatProps);
+  }
+};
 
-const trackIds = R.compose(R.join(','), R.pluck('id'))(R.slice(0, 2, songs_attr));
-console.log(trackIds);
+const extractSongDetails = function(tracks){
+  return function(songBody, idx){
+    const flag = tracks[idx].PlatinumGoldFlag
+    const songs = R.map(extractProps(flag))(songBody.body.tracks.items);
+    return songs;
+  }
+};
+var tracksCopy = [];
+var mapIndexed = R.addIndex(R.map);
+const start = parseInt(process.env.START);
+const end = parseInt(process.env.END);
+var i = 0;
+csv2json('./collated_data_set.csv').then(function(tracks){
+  P.mapSeries(R.slice(start, end, tracks), function (track){
+    tracksCopy = tracks;
+    const trackQuery = getTrackQuery(track);
+    console.log(trackQuery);
+    i = i+1;
+    console.log(i);
+    return spotifyApi.searchTracks(trackQuery);
+  }).then(function(tracksRes){
+    const cleanTracks = R.flatten(mapIndexed(extractSongDetails(tracksCopy))(tracksRes));
+    json2csv('records.csv', cleanTracks);
+  }).catch(function(err){
+    console.log(err);
+  });
+});
+
+
+
+
+// console.log(songSearchQueries);
+//
+//
+//
+// const startIndex = process.env['START'];
+// const endIndex = process.env['END'];
+//
+//
+//
+//
+// const songs_attr = require('./song_attr');
+//
+// const trackIds = R.compose(R.join(','), R.pluck('id'))(R.slice(0, 2, songs_attr));
+// console.log(trackIds);
 
 // P.mapSeries(R.pluck('id'),songs_attr), function(track){
 //   console.log(track);
