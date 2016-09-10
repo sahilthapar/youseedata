@@ -49,7 +49,7 @@ var tracksCopy = [];
 var mapIndexed = R.addIndex(R.map);
 const start = parseInt(process.env.START);
 const end = parseInt(process.env.END);
-var i = 0;
+var i = start;
 csv2json('./collated_data_set.csv').then(function(tracks){
   P.mapSeries(R.slice(start, end, tracks), function (track){
     tracksCopy = tracks;
