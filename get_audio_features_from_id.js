@@ -17,18 +17,32 @@ spotifyApi.setAccessToken(accessToken);
 const start = parseInt(process.env.START);
 const end = parseInt(process.env.END);
 var i = start;
+var recordsDone = [];
+const n = 100;
 csv2json(recordsPath).then(function(records){
-  P.mapSeries(R.slice(start, end, R.pluck('id')(records)), function (record){
-    i = i+1;
-    console.log(i);
-    return spotifyApi.getAudioFeaturesForTrack(record);
-  }).then(function(tracks){
-    json2csv('audio_features.csv', R.pluck('body')(tracks));
-  }).catch(function(err){
-    console.log(err);
-  });
+    P.mapSeries(R.compose(R.splitEvery(n), R.slice(start, end), R.pluck('id'))(records), function (nrecords){
+      console.log(i);
+      i = i+n;
+      return (new P(function(resolve, reject){
+        spotifyApi.getAudioFeaturesForTracks(nrecords).then(function(track){
+          recordsDone.push(track);
+          resolve(true);
+        }).catch(function(err){
+          console.log(err)
+          reject(err)
+        })
+      }));
+    }).then(function(tracks){
+      const toWrite = R.compose(R.flatten, R.pluck('audio_features'), R.pluck('body'))(recordsDone)
+      // console.log(toWrite)
+      json2csv('audio_features_multiple.csv', toWrite);
+    }).catch(function(err){
+      console.log(err);
+      const toWrite = R.compose(R.flatten, R.pluck('audio_features'), R.pluck('body'))(recordsDone)
+      // console.log(toWrite)
+      json2csv('audio_features_multiple.csv', toWrite);
+    });
 });
-
 
 
 

@@ -21,7 +21,7 @@ const R = require('ramda');
 
 module.exports = function(filepath, data){
   const fields  = R.keys(data[0]);
-  const csv = json2csv({ data: data, fields: fields });
+  const csv = json2csv({ data: data, fields: fields }, {hasCSVColumnTitle:false});
   return fs.appendFile(filepath, csv, function(err) {
     if (err) throw err;
     console.log('file saved');

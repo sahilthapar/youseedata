@@ -4,8 +4,10 @@
   "description": "Hackathon @ 84.51",
   "main": "index.js",
   "dependencies": {
+    "elasticsearch": "^11.0.1",
     "fast-csv": "^2.1.0",
     "json2csv": "^3.6.3",
+    "moment": "^2.14.1",
     "ramda": "^0.22.1",
     "spotify-web-api-node": "^2.3.5"
   },

@@ -55,11 +55,16 @@ csv2json('./collated_data_set.csv').then(function(tracks){
     tracksCopy = tracks;
     const trackQuery = getTrackQuery(track);
     console.log(trackQuery);
-    i = i+1;
     console.log(i);
-    return spotifyApi.searchTracks(trackQuery);
+    i = i+1;
+    return new P(function(resolve){
+      setTimeout(resolve, 250)
+    }).then(function(r){
+      return spotifyApi.searchTracks(trackQuery);
+    })
   }).then(function(tracksRes){
     const cleanTracks = R.flatten(mapIndexed(extractSongDetails(tracksCopy))(tracksRes));
+    console.log(cleanTracks)
     json2csv('records.csv', cleanTracks);
   }).catch(function(err){
     console.log(err);
