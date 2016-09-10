@@ -40,7 +40,7 @@ const extractProps = function(flag){
 
 const extractSongDetails = function(tracks){
   return function(songBody, idx){
-    const flag = tracks[idx].PlatinumGoldFlag
+    const flag = tracks[start+idx].PlatinumGoldFlag
     const songs = R.map(extractProps(flag))(songBody.body.tracks.items);
     return songs;
   }
