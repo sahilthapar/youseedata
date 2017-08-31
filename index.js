@@ -15,6 +15,8 @@ console.log(accessToken);
 const spotifyApi = new SpotifyWebApi();
 spotifyApi.setAccessToken(accessToken);
 
+// Did not include the credentials file 
+
 
 
 
@@ -95,13 +97,3 @@ csv2json('./collated_data_set.csv').then(function(tracks){
 // }).then(function(tracks){
 //   console.log(R.pluck('body')(tracks))
 // });
-
-
-
-
-
-
-
-
-
-
